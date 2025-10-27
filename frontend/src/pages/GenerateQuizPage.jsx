@@ -205,6 +205,7 @@ const GenerateQuizPage = () => {
         setShowResults(true);
         const correctCount = quiz.filter((q, i) => userAnswers[i] === q.correctAnswer).length;
 
+        // Exit fullscreen
         if (document.fullscreenElement) {
             document.exitFullscreen?.();
         }
@@ -222,14 +223,19 @@ const GenerateQuizPage = () => {
                     userAnswers,
                     quizData: quiz,
                     quizTime,
-                    autoSubmitted,
+                    autoSubmitted: autoSubmit, // ✅ FIXED VARIABLE NAME
                     tabSwitchCount,
                 });
+                console.log("✅ Quiz saved successfully in Firestore.");
             } catch (err) {
-                console.error("Error saving quiz history:", err);
+                console.error("🔥 Error saving quiz history:", err);
+                alert("⚠️ Quiz saved locally, but could not be stored in Firestore.");
             }
+        } else {
+            console.warn("⚠️ No user logged in. Skipping Firestore save.");
         }
     };
+
 
     // Exit button visibility
     useEffect(() => {
