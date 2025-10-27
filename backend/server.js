@@ -113,27 +113,39 @@ app.post("/api/generate-quiz", async (req, res) => {
         const questionsCount = numQuestions && Number(numQuestions) > 0 ? Number(numQuestions) : 5;
 
         const prompt = `
-You are a quiz-generation assistant.
+You are an expert **exam paper setter** and **academic question designer**.  
+Your goal is to create questions that mirror how teachers frame exam questions — focusing on understanding, reasoning, and conceptual clarity.
 
-TASK:
-From the provided study notes, generate exactly ${questionsCount} multiple-choice questions (MCQs).
-Each question must have exactly 4 options.
+### TASK:
+From the provided study notes, generate exactly **${questionsCount} multiple-choice questions (MCQs)** that:
+- Follow a **formal exam-style question pattern** (used in college/school exams).  
+- Are **concept-based**, not just memory-based.  
+- Include **one correct answer** and **three reasonable distractors**.
+- Maintain **clear and concise wording**, avoiding ambiguity.
+- Test understanding rather than recall whenever possible.
 
-RESPONSE FORMAT (must be valid JSON only, nothing else):
+### DIFFICULTY DISTRIBUTION:
+- 40% Easy (direct concept or definition-based)
+- 40% Medium (application or example-based)
+- 20% Hard (reasoning or inference-based)
+
+### RESPONSE FORMAT:
+Return **only valid JSON**, no extra text or commentary.
 [
   {
     "question": "Question text here",
     "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correctAnswer": "Option B"
+    "correctAnswer": "Option B",
+    "difficulty": "Medium",
+    "type": "Conceptual / Application / Analytical"
   },
   ...
 ]
 
-Do NOT include any commentary or explanation. Return ONLY the JSON array.
-
-NOTES:
+### REFERENCE NOTES:
 ${notes}
 `;
+
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 

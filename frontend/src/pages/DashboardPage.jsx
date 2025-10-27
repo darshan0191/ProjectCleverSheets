@@ -10,18 +10,22 @@ const DashboardPage = () => {
     const [quizHistory, setQuizHistory] = useState([]);
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [showProfile, setShowProfile] = useState(false);
+    const [topPerformer, setTopPerformer] = useState(null);
     const navigate = useNavigate();
 
     // Track user
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((currentUser) => {
             setUser(currentUser);
-            if (currentUser) fetchQuizHistory(currentUser.uid);
+            if (currentUser) {
+                fetchQuizHistory(currentUser.uid);
+                fetchTopPerformer();
+            }
         });
         return () => unsubscribe();
     }, []);
 
-    // Fetch quiz data
+    // Fetch logged-in user's quiz history
     const fetchQuizHistory = async (uid) => {
         try {
             const quizRef = collection(db, "users", uid, "quizHistory");
@@ -33,24 +37,54 @@ const DashboardPage = () => {
         }
     };
 
-    // Get unique topics
+    // 🔥 Fetch Top Performer across all users
+    const fetchTopPerformer = async () => {
+        try {
+            const usersRef = collection(db, "users");
+            const usersSnap = await getDocs(usersRef);
+
+            let topUser = null;
+            let maxQuizzes = 0;
+
+            for (const userDoc of usersSnap.docs) {
+                const uid = userDoc.id;
+                const quizRef = collection(db, "users", uid, "quizHistory");
+                const quizSnap = await getDocs(quizRef);
+                const quizCount = quizSnap.size;
+
+                if (quizCount > maxQuizzes) {
+                    maxQuizzes = quizCount;
+                    topUser = {
+                        uid,
+                        email: userDoc.data().email || "Unknown",
+                        name: userDoc.data().displayName || userDoc.data().email || "Unknown User",
+                        totalQuizzes: quizCount,
+                    };
+                }
+            }
+
+            if (topUser) setTopPerformer(topUser);
+        } catch (err) {
+            console.error("Error fetching top performer:", err);
+        }
+    };
+
+    // Unique topics
     const topics = [
         ...new Set(
             quizHistory.map((quiz) => quiz.quizTitle?.replace(".pdf", "") || "Untitled")
         ),
     ];
 
-    // Filter quizzes by selected topic
+    // Filter by selected topic
     const filteredQuizzes = selectedTopic
         ? quizHistory.filter(
             (quiz) => quiz.quizTitle?.replace(".pdf", "") === selectedTopic
         )
         : [];
 
-    // Calculate total quizzes solved
+    // Stats
     const totalQuizzes = quizHistory.length;
-
-    // Calculate overall accuracy
     const overallAccuracy =
         totalQuizzes > 0
             ? Math.round(
@@ -62,7 +96,7 @@ const DashboardPage = () => {
             )
             : 0;
 
-    // Get initials
+    // Profile initials
     const getInitials = (user) => {
         const displayName = user?.displayName || user?.email || "";
         if (!displayName) return "";
@@ -145,15 +179,26 @@ const DashboardPage = () => {
                 </div>
             </nav>
 
-            {/* Dashboard Content */}
+            {/* Dashboard */}
             <div className="dashboard-content-wrapper">
                 <h2 className="dashboard-title">📊 User Dashboard</h2>
                 <p className="dashboard-subtitle">
-                    Track your progress, performance, and topics you’ve mastered.
+                    Track your progress, performance, and see top performers.
                 </p>
 
+                {/* 🏆 Top Performer Section */}
+                {topPerformer && (
+                    <div className="top-performer-card">
+                        <h3>🏆 Top Performer</h3>
+                        <p>
+                            <strong>{topPerformer.name}</strong> has solved{" "}
+                            <strong>{topPerformer.totalQuizzes}</strong> quizzes!
+                        </p>
+                    </div>
+                )}
+
                 <div className="dashboard-content">
-                    {/* Left Side - Topics (Sticky) */}
+                    {/* Left - Topics */}
                     <div className="topics-section">
                         <h3>📘 Topics</h3>
                         {topics.length > 0 ? (
@@ -173,7 +218,7 @@ const DashboardPage = () => {
                         )}
                     </div>
 
-                    {/* Center - Stats and Quiz History */}
+                    {/* Center - Stats */}
                     <div className="center-section">
                         <div className="stat-card">
                             <h3>🧩 Total Quizzes Solved</h3>
