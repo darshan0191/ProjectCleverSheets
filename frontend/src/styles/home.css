@@ -1,0 +1,209 @@
+/* Body */
+body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #acb6e5);
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    /* Height enough for profile icon */
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    /* Reduced padding to ensure profile icon fits */
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+.navbar-left .navbar-title {
+    font-size: 22px;
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+.navbar-center {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    color: #181819a4;
+    transform: scale(1.05);
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 50px;
+    /* Ensure right side has space */
+}
+
+/* Profile Icon */
+.profile-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profile-icon {
+    width: 42px;
+    height: 42px;
+    background-color: #4f46e5;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Profile Dropdown */
+.profile-dropdown {
+    position: absolute;
+    top: 90px;
+    right: 0;
+    background: white;
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    min-width: 200px;
+    z-index: 1001;
+}
+
+.profile-dropdown p {
+    margin: 5px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.profile-dropdown .logout-btn {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 8px;
+}
+
+/* Buttons */
+.btn {
+    font-family: "Poppins", sans-serif;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.login-btn {
+    background-color: #4f46e5;
+    color: white;
+}
+
+.signup-btn {
+    background-color: #10b981;
+    color: white;
+}
+
+.logout-btn {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* Main Content */
+.home-main-content {
+    padding-top: 140px;
+    /* Ensure main content below navbar */
+    text-align: center;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.home-title-bold {
+    font-size: 64px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 10px;
+}
+
+.home-subtitle-light {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 40px;
+}
+
+/* Cards Grid */
+.home-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 150px;
+    justify-items: center;
+    padding: 0 20px;
+}
+
+.home-card-action {
+    background: #fff;
+    padding: 30px 25px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.home-card-action:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+.home-card-action h2 {
+    margin-bottom: 12px;
+    color: #1e3a8a;
+}
+
+.home-card-action p {
+    color: #555;
+    font-size: 15px;
+}
+
+/* Login message */
+.login-message {
+    color: #555;
+    margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .home-card-grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+    }
+
+    .navbar-center {
+        display: none;
+    }
+}
