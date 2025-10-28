@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './styles.css';
 import { generateQuizFromNotes } from './utils/generateQuizFromNotes';
 import { extractTextFromPDF } from './utils/extractTextFromPDF';
-import QuizDisplay from "./pages/QuizDisplay";
 import QuizHistoryPage from "./pages/QuizHistoryPage";
 
 
