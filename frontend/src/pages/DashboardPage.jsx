@@ -13,7 +13,6 @@ const DashboardPage = () => {
     const [topPerformer, setTopPerformer] = useState(null);
     const navigate = useNavigate();
 
-    // Track user
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((currentUser) => {
             setUser(currentUser);
@@ -25,7 +24,6 @@ const DashboardPage = () => {
         return () => unsubscribe();
     }, []);
 
-    // Fetch logged-in user's quiz history
     const fetchQuizHistory = async (uid) => {
         try {
             const quizRef = collection(db, "users", uid, "quizHistory");
@@ -37,12 +35,10 @@ const DashboardPage = () => {
         }
     };
 
-    // 🔥 Fetch Top Performer across all users
     const fetchTopPerformer = async () => {
         try {
             const usersRef = collection(db, "users");
             const usersSnap = await getDocs(usersRef);
-
             let topUser = null;
             let maxQuizzes = 0;
 
@@ -69,21 +65,18 @@ const DashboardPage = () => {
         }
     };
 
-    // Unique topics
     const topics = [
         ...new Set(
             quizHistory.map((quiz) => quiz.quizTitle?.replace(".pdf", "") || "Untitled")
         ),
     ];
 
-    // Filter by selected topic
     const filteredQuizzes = selectedTopic
         ? quizHistory.filter(
             (quiz) => quiz.quizTitle?.replace(".pdf", "") === selectedTopic
         )
         : [];
 
-    // Stats
     const totalQuizzes = quizHistory.length;
     const overallAccuracy =
         totalQuizzes > 0
@@ -96,7 +89,6 @@ const DashboardPage = () => {
             )
             : 0;
 
-    // Profile initials
     const getInitials = (user) => {
         const displayName = user?.displayName || user?.email || "";
         if (!displayName) return "";
@@ -120,9 +112,9 @@ const DashboardPage = () => {
     };
 
     return (
-        <div className="dashboard-container">
-            {/* Navbar */}
-            <nav className="navbar">
+        <div className="dashboard-page">
+            {/* Fixed Navbar */}
+            <nav className="navbar glassy-nav">
                 <div className="navbar-left">
                     <h2 className="navbar-title">CleverSheets</h2>
                 </div>
@@ -134,10 +126,7 @@ const DashboardPage = () => {
                     <button className="nav-btn" onClick={() => navigate("/quiz-history")}>
                         Quiz History
                     </button>
-                    <button
-                        className="nav-btn"
-                        onClick={() => alert("Settings Coming Soon ⚙️")}
-                    >
+                    <button className="nav-btn" onClick={() => alert("Settings Coming Soon ⚙️")}>
                         Settings
                     </button>
                 </div>
@@ -153,7 +142,7 @@ const DashboardPage = () => {
                             </div>
 
                             {showProfile && (
-                                <div className="profile-dropdown">
+                                <div className="profile-dropdown glassy-card">
                                     <p>
                                         <strong>Name:</strong> {user.displayName || "N/A"}
                                     </p>
@@ -179,16 +168,15 @@ const DashboardPage = () => {
                 </div>
             </nav>
 
-            {/* Dashboard */}
-            <div className="dashboard-content-wrapper">
-                <h2 className="dashboard-title">📊 User Dashboard</h2>
-                <p className="dashboard-subtitle">
-                    Track your progress, performance, and see top performers.
-                </p>
+            {/* Scrollable Content */}
+            <div className="dashboard-scroll">
+                <div className="dashboard-header glassy-card">
+                    <h2>📊 User Dashboard</h2>
+                    <p>Track your progress, performance, and see top performers.</p>
+                </div>
 
-                {/* 🏆 Top Performer Section */}
                 {topPerformer && (
-                    <div className="top-performer-card">
+                    <div className="top-performer glassy-card">
                         <h3>🏆 Top Performer</h3>
                         <p>
                             <strong>{topPerformer.name}</strong> has solved{" "}
@@ -197,9 +185,8 @@ const DashboardPage = () => {
                     </div>
                 )}
 
-                <div className="dashboard-content">
-                    {/* Left - Topics */}
-                    <div className="topics-section">
+                <div className="dashboard-grid">
+                    <div className="topics-section glassy-card">
                         <h3>📘 Topics</h3>
                         {topics.length > 0 ? (
                             <ul className="topics-list">
@@ -218,23 +205,21 @@ const DashboardPage = () => {
                         )}
                     </div>
 
-                    {/* Center - Stats */}
-                    <div className="center-section">
-                        <div className="stat-card">
+                    <div className="stats-section glassy-card">
+                        <div className="stat">
                             <h3>🧩 Total Quizzes Solved</h3>
                             <p className="stat-value">{totalQuizzes}</p>
                         </div>
-
-                        <div className="stat-card">
+                        <div className="stat">
                             <h3>🎯 Overall Accuracy</h3>
                             <p className="stat-value">{overallAccuracy}%</p>
                         </div>
 
                         {selectedTopic && (
-                            <div className="topic-quiz-history">
+                            <div className="topic-details">
                                 <h3>📝 Quiz History for "{selectedTopic}"</h3>
                                 {filteredQuizzes.length > 0 ? (
-                                    <ul className="quiz-history-list">
+                                    <ul>
                                         {filteredQuizzes.map((quiz, idx) => (
                                             <li key={idx}>
                                                 {quiz.quizTitle.replace(".pdf", "")} —{" "}

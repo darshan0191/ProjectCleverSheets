@@ -33,21 +33,15 @@ const GenerateQuizPage = () => {
     const dingSound = useRef(null);
 
     useEffect(() => {
-        dingSound.current = new Audio(
-            "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
-        );
+        dingSound.current = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
         dingSound.current.volume = 0.7;
     }, []);
 
-    // Track user
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-            setUser(currentUser);
-        });
+        const unsubscribe = auth.onAuthStateChanged((currentUser) => setUser(currentUser));
         return () => unsubscribe();
     }, []);
 
-    // Handle logout
     const handleLogout = async () => {
         if (quiz.length > 0 && !showResults) {
             handleNavigationAttempt();
@@ -103,40 +97,33 @@ const GenerateQuizPage = () => {
         const displayName = user?.displayName || user?.email || "";
         if (!displayName) return "";
         const names = displayName.split(" ");
-        const initials =
-            names.length === 1
-                ? names[0][0]
-                : names[0][0] + names[names.length - 1][0];
-        return initials.toUpperCase();
+        return names.length === 1
+            ? names[0][0].toUpperCase()
+            : (names[0][0] + names[names.length - 1][0]).toUpperCase();
     };
 
     const extractTextFromPDF = async (file) => {
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         let fullText = "";
+
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
             let pageText = textContent.items.map((item) => item.str).join(" ");
-            fullText += pageText + "\n";
-
-            // If no text found, use OCR on canvas image
             if (!pageText.trim()) {
                 const viewport = page.getViewport({ scale: 2 });
                 const canvas = document.createElement("canvas");
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 const ctx = canvas.getContext("2d");
-
                 await page.render({ canvasContext: ctx, viewport }).promise;
-                const ocrResult = await Tesseract.recognize(canvas, "eng", {
-                    logger: (m) => console.log(m),
-                });
+                const ocrResult = await Tesseract.recognize(canvas, "eng");
                 pageText = ocrResult.data.text;
             }
-
             fullText += pageText + "\n";
         }
+
         if (!fullText.trim()) throw new Error("No readable text found in PDF");
         return fullText;
     };
@@ -154,22 +141,14 @@ const GenerateQuizPage = () => {
             setTabSwitchCount(0);
 
             try {
-                // Fullscreen on quiz start
                 const docElm = document.documentElement;
                 if (docElm.requestFullscreen) await docElm.requestFullscreen();
-                else if (docElm.webkitRequestFullscreen) await docElm.webkitRequestFullscreen();
-                else if (docElm.msRequestFullscreen) await docElm.msRequestFullscreen();
-
                 setIsFullscreen(true);
 
                 const text = await extractTextFromPDF(file);
                 const quizData = await generateQuizFromNotes(text, numQuestions);
-                if (typeof quizData === "string") {
-                    alert("The quiz format isn't structured properly. Try again.");
-                } else {
-                    setQuiz(quizData);
-                    setTimeLeft(quizTime * 60);
-                }
+                setQuiz(quizData);
+                setTimeLeft(quizTime * 60);
             } catch (err) {
                 console.error(err);
                 setError("Error generating quiz. Please try again.");
@@ -185,7 +164,6 @@ const GenerateQuizPage = () => {
         accept: { "application/pdf": [] },
     });
 
-    // Timer
     useEffect(() => {
         if (quiz.length > 0 && !showResults && timeLeft > 0) {
             const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
@@ -204,14 +182,9 @@ const GenerateQuizPage = () => {
     const handleSubmit = async (autoSubmit = false) => {
         setShowResults(true);
         const correctCount = quiz.filter((q, i) => userAnswers[i] === q.correctAnswer).length;
-
-        // Exit fullscreen
-        if (document.fullscreenElement) {
-            document.exitFullscreen?.();
-        }
+        if (document.fullscreenElement) document.exitFullscreen?.();
         setIsFullscreen(false);
 
-        const user = auth.currentUser;
         if (user) {
             try {
                 const ref = collection(db, "users", user.uid, "quizHistory");
@@ -223,38 +196,14 @@ const GenerateQuizPage = () => {
                     userAnswers,
                     quizData: quiz,
                     quizTime,
-                    autoSubmitted: autoSubmit, // ✅ FIXED VARIABLE NAME
+                    autoSubmitted: autoSubmit,
                     tabSwitchCount,
                 });
-                console.log("✅ Quiz saved successfully in Firestore.");
             } catch (err) {
-                console.error("🔥 Error saving quiz history:", err);
-                alert("⚠️ Quiz saved locally, but could not be stored in Firestore.");
+                console.error("🔥 Error saving quiz:", err);
             }
-        } else {
-            console.warn("⚠️ No user logged in. Skipping Firestore save.");
         }
     };
-
-
-    // Exit button visibility
-    useEffect(() => {
-        const handleMouseMove = (e) => {
-            if (
-                e.clientY < 80 &&
-                e.clientX > window.innerWidth / 3 &&
-                e.clientX < (2 * window.innerWidth) / 3
-            ) {
-                setShowExitButton(true);
-            } else {
-                setShowExitButton(false);
-            }
-        };
-        if (isFullscreen) {
-            window.addEventListener("mousemove", handleMouseMove);
-        }
-        return () => window.removeEventListener("mousemove", handleMouseMove);
-    }, [isFullscreen]);
 
     const exitFullscreen = () => {
         if (document.fullscreenElement) document.exitFullscreen?.();
@@ -267,90 +216,83 @@ const GenerateQuizPage = () => {
     };
 
     return (
-        <div className="generate-quiz-container">
-            {showExitButton && (
-                <div className="exit-fullscreen-btn" onClick={exitFullscreen}>
-                    ⬆ Exit Fullscreen
-                </div>
-            )}
-
-            {/* Navbar is hidden in fullscreen */}
+        <div className="generate-page">
             {!isFullscreen && (
-                <nav className="navbar">
-                    <div className="navbar-left"><h2 className="navbar-title">CleverSheets</h2></div>
-                    <div className="navbar-center">
-                        <button className="nav-btn" onClick={() => handleSafeNavigation("/")}>Home</button>
-                        <button className="nav-btn" onClick={() => handleSafeNavigation("/quiz-history")}>Quiz History</button>
-                        <button className="nav-btn" onClick={() => alert("Feedback Feature Coming Soon 💬")}>Feedback</button>
+                <nav className="navbar glass-navbar">
+                    <h2 className="navbar-logo">CleverSheets</h2>
+                    <div className="navbar-links">
+                        <button onClick={() => handleSafeNavigation("/")}>Home</button>
+                        <button onClick={() => handleSafeNavigation("/quiz-history")}>Quiz History</button>
+                        <button onClick={() => alert("Feedback Feature Coming Soon 💬")}>Feedback</button>
                     </div>
-                    <div className="navbar-right">
+                    <div className="navbar-profile">
                         {user ? (
                             <div className="profile-container">
-                                <div className="profile-icon" onClick={() => setShowProfile(!showProfile)}>{getInitials(user)}</div>
+                                <div className="profile-icon" onClick={() => setShowProfile(!showProfile)}>
+                                    {getInitials(user)}
+                                </div>
                                 {showProfile && (
-                                    <div className="profile-dropdown">
-                                        <p><strong>Name:</strong> {user.displayName || "N/A"}</p>
-                                        <p><strong>Email:</strong> {user.email}</p>
-                                        <button className="btn logout-btn" onClick={handleLogout}>Logout</button>
+                                    <div className="profile-dropdown glass-effect">
+                                        <p><strong>{user.displayName || "User"}</strong></p>
+                                        <p>{user.email}</p>
+                                        <button onClick={handleLogout}>Logout</button>
                                     </div>
                                 )}
                             </div>
                         ) : (
                             <>
-                                <button className="btn login-btn" onClick={() => handleSafeNavigation("/login")}>Login</button>
-                                <button className="btn signup-btn" onClick={() => handleSafeNavigation("/signup")}>Signup</button>
+                                <button onClick={() => handleSafeNavigation("/login")}>Login</button>
+                                <button onClick={() => handleSafeNavigation("/signup")}>Signup</button>
                             </>
                         )}
                     </div>
                 </nav>
             )}
 
-            {/* Upload Section */}
             {!quiz.length && !isFullscreen && (
-                <>
-                    <div className="generate-title-section">
-                        <h1>🧠 CleverSheets: Notes to Quiz Converter</h1>
-                        <p>This tool serves as your personal Notes to Quiz Converter, bridging the gap
-                            between passive note-taking and active learning. It instantly analyzes your
-                            documents using AI, extracts key facts, and generates structured, custom quizzes.
-                            Stop wasting time manually preparing study questions; turn your materials into
-                            reliable assessment tools for instant recall and mastery.</p>
+                <div className="generate-section">
+                    <div className="intro glass-effect">
+                        <h1>🧠 Generate AI-Powered Quizzes</h1>
+                        <p>
+                            Upload your notes or PDFs and let <strong>CleverSheets</strong> instantly transform them
+                            into interactive quizzes. Choose your desired number of questions and set the quiz time.
+                            Engage smarter — learn faster.
+                        </p>
                     </div>
 
-                    <div className="selectors-container">
-                        <div>
-                            <label>Number of Questions: </label>
-                            <select value={numQuestions} onChange={(e) => setNumQuestions(Number(e.target.value))}>
-                                {[5, 10, 15, 20].map((num) => <option key={num} value={num}>{num}</option>)}
-                            </select>
-                        </div>
+                    <div className="controls glass-effect">
+                        <label>Number of Questions:</label>
+                        <select value={numQuestions} onChange={(e) => setNumQuestions(Number(e.target.value))}>
+                            {[5, 10, 15, 20].map((n) => (
+                                <option key={n} value={n}>{n}</option>
+                            ))}
+                        </select>
 
-                        <div>
-                            <label>Quiz Time (minutes): </label>
-                            <select value={quizTime} onChange={(e) => setQuizTime(Number(e.target.value))}>
-                                {[5, 10, 15, 20].map((min) => <option key={min} value={min}>{min}</option>)}
-                            </select>
-                        </div>
+                        <label>Quiz Time (minutes):</label>
+                        <select value={quizTime} onChange={(e) => setQuizTime(Number(e.target.value))}>
+                            {[5, 10, 15, 20].map((n) => (
+                                <option key={n} value={n}>{n}</option>
+                            ))}
+                        </select>
                     </div>
 
-                    <div {...getRootProps({ className: "upload-box" })}>
+                    <div {...getRootProps({ className: "upload-area glass-effect" })}>
                         <input {...getInputProps()} />
-                        <p>📄 Drag & drop or click to upload a PDF</p>
+                        <p>📄 Drag & Drop or Click to Upload Your PDF</p>
+                        <small>Supports text & scanned files (OCR supported)</small>
                     </div>
-                </>
+                </div>
             )}
 
-            {loading && <p className="loading">⏳ Generating Quiz...</p>}
-            {error && <p className="error">{error}</p>}
+            {loading && <p className="loading glass-effect">⏳ Generating Your Quiz...</p>}
+            {error && <p className="error glass-effect">{error}</p>}
 
-            {/* Quiz Section */}
             {quiz.length > 0 && (
-                <div className="quiz-section">
-                    <div className="timer-display">⏱ Time Left: {formatTime(timeLeft)}</div>
-                    {!showResults && <h2>🧠 Question {currentQuestion + 1} of {quiz.length}</h2>}
-
+                <div className="quiz-box glass-effect">
+                    <div className="timer">⏱ Time Left: {formatTime(timeLeft)}</div>
                     {!showResults && (
-                        <div className="question-card">
+                        <>
+                            <h2>Question {currentQuestion + 1} / {quiz.length}</h2>
                             <h3>{quiz[currentQuestion].question}</h3>
                             <div className="options">
                                 {quiz[currentQuestion].options.map((option, i) => (
@@ -363,23 +305,19 @@ const GenerateQuizPage = () => {
                                     </button>
                                 ))}
                             </div>
-                        </div>
+                            <div className="nav-buttons">
+                                <button disabled={currentQuestion === 0} onClick={() => setCurrentQuestion(p => p - 1)}>⬅ Prev</button>
+                                {currentQuestion === quiz.length - 1 ? (
+                                    <button onClick={() => handleSubmit(false)}>Submit Quiz</button>
+                                ) : (
+                                    <button onClick={() => setCurrentQuestion(p => p + 1)}>Next ➡</button>
+                                )}
+                            </div>
+                        </>
                     )}
 
-                    {!showResults && (
-                        <div className="navigation-buttons">
-                            <button disabled={currentQuestion === 0} onClick={() => setCurrentQuestion((p) => p - 1)}>⬅ Prev</button>
-                            {currentQuestion === quiz.length - 1 ? (
-                                <button className="submit-btn" onClick={() => handleSubmit(false)}>Submit Quiz</button>
-                            ) : (
-                                <button onClick={() => setCurrentQuestion((p) => p + 1)}>Next ➡</button>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Results */}
                     {showResults && (
-                        <div className="results-box">
+                        <div className="results">
                             <h3>✅ Quiz Completed!</h3>
                             <p>You got {quiz.filter((q, i) => userAnswers[i] === q.correctAnswer).length} / {quiz.length} correct.</p>
                             <p>🧭 Tab Switches: {tabSwitchCount}</p>

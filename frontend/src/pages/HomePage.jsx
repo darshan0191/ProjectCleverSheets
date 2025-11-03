@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase/config";
 import "../styles/home.css";
 
-function HomePage() {
-    const navigate = useNavigate();
+const HomePage = () => {
     const [user, setUser] = useState(null);
     const [showProfile, setShowProfile] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -20,6 +20,7 @@ function HomePage() {
             await auth.signOut();
             setShowProfile(false);
             setUser(null);
+            navigate("/");
         } catch (err) {
             console.error(err);
         }
@@ -38,8 +39,8 @@ function HomePage() {
 
     return (
         <div className="home-container">
-            {/* Navbar */}
-            <nav className="navbar">
+            {/* NAVBAR */}
+            <nav className="navbar-glass">
                 <div className="navbar-left">
                     <h2 className="navbar-title">CleverSheets</h2>
                 </div>
@@ -48,17 +49,11 @@ function HomePage() {
                     <button className="nav-btn" onClick={() => navigate("/dashboard")}>
                         Dashboard
                     </button>
-                    <button
-                        className="nav-btn"
-                        onClick={() => alert("Settings Coming Soon ⚙️")}
-                    >
-                        Settings
+                    <button className="nav-btn" onClick={() => navigate("/generate")}>
+                        Generate
                     </button>
-                    <button
-                        className="nav-btn"
-                        onClick={() => alert("Feedback Feature Coming Soon 💬")}
-                    >
-                        Feedback
+                    <button className="nav-btn" onClick={() => navigate("/quiz-history")}>
+                        Quiz History
                     </button>
                 </div>
 
@@ -71,11 +66,10 @@ function HomePage() {
                             >
                                 {getInitials(user)}
                             </div>
-
                             {showProfile && (
-                                <div className="profile-dropdown">
+                                <div className="profile-dropdown glass">
                                     <p>
-                                        <strong>Name:</strong> {user.displayName}
+                                        <strong>Name:</strong> {user.displayName || "N/A"}
                                     </p>
                                     <p>
                                         <strong>Email:</strong> {user.email}
@@ -87,55 +81,56 @@ function HomePage() {
                             )}
                         </div>
                     ) : (
-                        <div className="auth-buttons">
-                            <button
-                                className="btn login-btn"
-                                onClick={() => navigate("/login")}
-                            >
+                        <>
+                            <button className="btn login-btn" onClick={() => navigate("/login")}>
                                 Login
                             </button>
-                            <button
-                                className="btn signup-btn"
-                                onClick={() => navigate("/signup")}
-                            >
+                            <button className="btn signup-btn" onClick={() => navigate("/signup")}>
                                 Signup
                             </button>
-                        </div>
+                        </>
                     )}
                 </div>
             </nav>
 
-            {/* Main Content */}
-            <div className="home-main-content">
-                <h1 className="home-title-bold">🧠 Notes to Quiz Converter</h1>
-                <p className="home-subtitle-light">
-                    Turn your notes into engaging quizzes instantly!
-                </p>
+            {/* HERO SECTION */}
+            <section className="hero-section">
+                <div className="hero-content glass">
+                    <h1 className="hero-title">Transform Your Notes into Smart Quizzes ✨</h1>
+                    <p className="hero-subtitle">
+                        CleverSheets helps you instantly generate engaging quizzes from your study notes.
+                    </p>
+                    <button className="get-started-btn" onClick={() => navigate("/generate")}>
+                        Get Started 🚀
+                    </button>
+                </div>
+            </section>
 
-                {user ? (
-                    <div className="home-card-grid">
-                        <div
-                            className="home-card-action"
-                            onClick={() => navigate("/generate")}
-                        >
-                            <h2>Generate Quiz</h2>
-                            <p>Create interactive quizzes from your notes.</p>
-                        </div>
-
-                        <div
-                            className="home-card-action"
-                            onClick={() => navigate("/quiz-history")}
-                        >
-                            <h2>📜 View Quiz History</h2>
-                            <p>Check all your previous quiz attempts.</p>
-                        </div>
+            {/* FEATURES */}
+            <section className="features-section">
+                <h2 className="section-title">Why Choose CleverSheets?</h2>
+                <div className="features-grid">
+                    <div className="feature-card glass">
+                        <h3>🧠 AI Quiz Generation</h3>
+                        <p>Upload notes and get automatically generated quizzes instantly.</p>
                     </div>
-                ) : (
-                    <p className="login-message">Login or Signup to access features</p>
-                )}
-            </div>
+                    <div className="feature-card glass">
+                        <h3>📊 Track Your Progress</h3>
+                        <p>See how well you’re improving across topics with detailed stats.</p>
+                    </div>
+                    <div className="feature-card glass">
+                        <h3>🌐 Collaborative Learning</h3>
+                        <p>Share quizzes and challenge your friends for better engagement!</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* FOOTER */}
+            <footer className="footer">
+                <p>© {new Date().getFullYear()} CleverSheets — Learn Smarter, Not Harder 💡</p>
+            </footer>
         </div>
     );
-}
+};
 
 export default HomePage;

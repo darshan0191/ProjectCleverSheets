@@ -5,7 +5,6 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import GenerateQuizPage from './pages/GenerateQuizPage';
-import QuizPage from './pages/QuizPage';
 import QuizHistoryPage from "./pages/QuizHistoryPage";
 import DashboardPage from "./pages/DashboardPage";
 

@@ -1,341 +1,345 @@
-/* --- Page Layout --- */
-.generate-quiz-container {
+/* 🌈 Global Page Styling */
+.generate-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0f0f, #1a1a1a, #111827);
+    color: #ffffff;
+    font-family: "Poppins", sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    /* ✅ Centers upload box vertically */
-    min-height: 100vh;
-    padding: 1.5rem;
-    box-sizing: border-box;
-    text-align: center;
+    padding-bottom: 4rem;
+    overflow-x: hidden;
 }
 
-/* --- Navigation Buttons --- */
-.top-nav-buttons {
+/* 🧊 Liquid Glass Effect */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.glass-effect:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+/* 🌐 Navbar Styling */
+.glass-navbar {
+    width: 95%;
+    margin: 1rem auto 2rem;
+    padding: 1rem 2rem;
+    border-radius: 20px;
     display: flex;
     justify-content: space-between;
-    width: 100%;
-    max-width: 700px;
-    margin-bottom: 2rem;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    z-index: 1000;
+    position: relative;
 }
 
-.nav-btn {
-    background: linear-gradient(90deg, #4f46e5, #6366f1);
-    color: white;
-    padding: 0.6rem 1.5rem;
+.navbar-logo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 1.2rem;
+}
+
+.navbar-links button {
+    background: transparent;
+    color: #e0e0e0;
     border: none;
-    border-radius: 10px;
-    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.nav-btn:hover {
-    transform: scale(1.05);
-    background: linear-gradient(90deg, #4338ca, #4f46e5);
+.navbar-links button:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
 }
 
-/* --- Title & Description Section --- */
-.generate-title-section {
-    text-align: center;
-    margin-top: 6rem;
-    /* ensures it’s below navbar */
-    max-width: 800px;
-}
-
-.generate-title {
-    font-size: 3rem;
-    font-weight: 700;
-    color: #4338ca;
-    margin-bottom: 0.8rem;
-}
-
-.generate-description {
-    font-size: 1.05rem;
-    color: #4b5563;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-    text-align: justify;
-}
-
-/* Number of Questions Selector */
-.num-questions-selector {
-    margin: 1.5rem 0;
-    font-size: 1rem;
+/* 👤 Profile Section */
+.navbar-profile {
     display: flex;
     align-items: center;
     gap: 0.8rem;
+}
+
+.profile-container {
+    position: relative;
+}
+
+.profile-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #7dd3fc, #2563eb);
+    color: white;
+    display: flex;
+    align-items: center;
     justify-content: center;
-}
-
-.num-questions-selector input {
-    width: 60px;
-    padding: 0.3rem 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    font-size: 1rem;
-    text-align: center;
-    cursor: pointer;
-    outline: none;
-}
-
-.num-questions-selector input:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 5px rgba(79, 70, 229, 0.3);
-}
-
-
-/* --- Upload Section --- */
-.upload-box {
-    border: 2px dashed #6366f1;
-    background: white;
-    padding: 2.5rem;
-    border-radius: 15px;
-    box-shadow: 0px 5px 15px rgba(99, 102, 241, 0.1);
-    width: 100%;
-    max-width: 600px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s ease;
-}
-
-.upload-box:hover {
-    transform: scale(1.02);
-    border-color: #4f46e5;
-}
-
-.upload-box p {
-    color: #4b5563;
-    font-size: 1.05rem;
-    font-weight: 500;
-}
-
-
-/* --- Loading & Error --- */
-.loading {
-    margin-top: 1rem;
-    color: #4f46e5;
     font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+    transition: all 0.3s ease;
+}
+
+.profile-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.8);
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 220px;
+    padding: 1rem;
+    color: #fff;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.profile-dropdown button {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    border: none;
+    padding: 0.5rem;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profile-dropdown button:hover {
+    background: linear-gradient(135deg, #f87171, #dc2626);
+}
+
+/* 📘 Intro Section */
+.generate-section {
+    text-align: center;
+    width: 90%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.intro {
+    padding: 2rem 2.5rem;
+}
+
+.intro h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.8rem;
+}
+
+.intro p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #d1d5db;
+}
+
+/* ⚙️ Quiz Settings */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    justify-content: center;
+    padding: 1rem 2rem;
+}
+
+.controls label {
+    color: #e5e7eb;
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.controls select {
+    padding: 0.4rem 0.8rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    outline: none;
+    cursor: pointer;
+}
+
+.controls select:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* 📤 Upload Area */
+.upload-area {
+    text-align: center;
+    padding: 2.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-area p {
+    font-size: 1.1rem;
+    color: #e5e7eb;
+    margin-bottom: 0.5rem;
+}
+
+.upload-area small {
+    color: #9ca3af;
+}
+
+/* ⏳ Loading / Error */
+.loading,
+.error {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+}
+
+.loading {
+    color: #22d3ee;
 }
 
 .error {
-    margin-top: 1rem;
-    color: #ef4444;
-    font-weight: 600;
+    color: #f87171;
 }
 
-/* --- Quiz Section (kept for future use) --- */
-.quiz-section {
-    background: white;
+/* 🧠 Quiz Section */
+.quiz-box {
     margin-top: 2rem;
+    width: 90%;
+    max-width: 900px;
     padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0px 5px 25px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 700px;
-    animation: fadeIn 0.6s ease-in-out;
-}
-
-.section-title {
     text-align: center;
-    color: #4338ca;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
 }
 
-/* --- Quiz Section Container --- */
-/* Ensures all quiz content fits inside the screen and allows scrolling */
-.quiz-section {
-    background: white;
-    margin-top: 2rem;
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0px 5px 25px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 800px;
-    animation: fadeIn 0.6s ease-in-out;
-
-    /* ✅ Fix for cut-off issue */
-    max-height: 75vh;
-    /* Ensures it fits within the viewport */
-    overflow-y: auto;
-    /* Enables vertical scrolling for long quizzes */
-    scroll-behavior: smooth;
+.timer {
+    color: #93c5fd;
+    font-size: 1rem;
+    margin-bottom: 1rem;
 }
 
-/* --- Question Card --- */
-.question-card {
-    margin-bottom: 1.5rem;
-    background: #f9fafb;
-    padding: 1.2rem;
-    border-radius: 12px;
-    transition: transform 0.3s, background-color 0.3s;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+.quiz-box h2 {
+    font-size: 1.4rem;
+    color: #f9fafb;
+    margin-bottom: 0.8rem;
 }
 
-.question-card:hover {
-    transform: scale(1.02);
-    background: #f3f4f6;
+.quiz-box h3 {
+    font-size: 1.1rem;
+    color: #e5e7eb;
+    margin-bottom: 1.2rem;
 }
 
-/* --- Options Section --- */
+/* 🧩 Options */
 .options {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
-    margin-top: 0.8rem;
 }
 
-/* --- Option Buttons --- */
 .option-btn {
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    padding: 0.8rem 1rem;
-    text-align: left;
-    background: white;
-    cursor: pointer;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.7rem 1rem;
+    border-radius: 12px;
     transition: all 0.3s ease;
-    font-weight: 500;
-    font-size: 1rem;
+    cursor: pointer;
 }
 
 .option-btn:hover {
-    background: #eef2ff;
-    border-color: #6366f1;
+    background: rgba(255, 255, 255, 0.15);
 }
 
-/* Selected and result states */
 .option-btn.selected {
-    background: #e0e7ff;
-    border-color: #4f46e5;
-}
-
-.option-btn.correct {
-    background: #dcfce7;
-    border-color: #22c55e;
-}
-
-.option-btn.wrong {
-    background: #fee2e2;
-    border-color: #ef4444;
-}
-
-/* --- Submit Button --- */
-.submit-btn {
-    margin-top: 1rem;
-    background: linear-gradient(90deg, #6366f1, #4f46e5);
-    color: white;
+    background: linear-gradient(135deg, #60a5fa, #2563eb);
     border: none;
-    border-radius: 12px;
-    padding: 0.8rem 2.5rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.7);
 }
 
-.submit-btn:hover {
-    transform: scale(1.05);
-    background: linear-gradient(90deg, #4f46e5, #4338ca);
-}
-
-/* --- Result Box --- */
-.results-box {
-    text-align: center;
+/* ⏩ Navigation Buttons */
+.nav-buttons {
     margin-top: 1.5rem;
-    padding: 1.2rem;
-    background: #f3f4f6;
-    border-radius: 12px;
-    color: #16a34a;
-    font-weight: 600;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-}
-
-/* --- Smooth Fade Animation --- */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* --- Responsive Design --- */
-@media (max-width: 600px) {
-    .quiz-section {
-        max-height: 70vh;
-        padding: 1.5rem;
-    }
-
-    .option-btn {
-        font-size: 0.95rem;
-        padding: 0.7rem 0.9rem;
-    }
-
-    .submit-btn {
-        padding: 0.7rem 2rem;
-        font-size: 0.95rem;
-    }
-}
-
-/* Existing styles remain unchanged */
-
-/* Navigation Buttons for Quiz Flow */
-.navigation-buttons {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1.5rem;
+    justify-content: center;
+    gap: 1rem;
 }
 
-.small-btn {
+.nav-buttons button {
+    background: linear-gradient(135deg, #2563eb, #1e3a8a);
+    border: none;
     padding: 0.6rem 1.5rem;
     border-radius: 10px;
-    background: linear-gradient(90deg, #6366f1, #4f46e5);
     color: white;
-    border: none;
-    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.small-btn:hover {
-    transform: scale(1.05);
-    background: linear-gradient(90deg, #4f46e5, #4338ca);
+.nav-buttons button:hover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
 }
 
-.small-btn:disabled {
-    background: #c7d2fe;
-    cursor: not-allowed;
+/* 🏁 Results Box */
+.results {
+    margin-top: 1.5rem;
 }
 
-/* Smooth Fade Animation for Question Changes */
-.question-card {
-    animation: fadeIn 0.4s ease-in-out;
+.results h3 {
+    color: #a7f3d0;
+    margin-bottom: 0.6rem;
 }
 
-/* Timer display */
-.timer-display {
-    text-align: right;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #ef4444;
-    margin-bottom: 0.8rem;
+.results button {
+    margin-top: 1rem;
+    background: linear-gradient(135deg, #10b981, #047857);
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-/* Selector container for number of questions and timer */
-.selectors-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8rem;
-    margin-bottom: 1.5rem;
+.results button:hover {
+    background: linear-gradient(135deg, #34d399, #059669);
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 768px) {
+    .navbar-links {
+        display: none;
+    }
+
+    .generate-section {
+        gap: 1rem;
+    }
+
+    .intro h1 {
+        font-size: 1.6rem;
+    }
+
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
 }
