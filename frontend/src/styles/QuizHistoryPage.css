@@ -3,46 +3,47 @@
     background: linear-gradient(135deg, #0f0f0f, #1a1a1a, #111827);
     color: #ffffff;
     height: 100vh;
-    padding-top: 90px;
     font-family: "Poppins", sans-serif;
-    overflow-y: scroll;
     display: block;
 }
 
 /* 🌊 NAVBAR */
 .navbar-glass-navbar {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 20;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(17, 25, 40, 0.75);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 14px 40px;
+    margin: 20px auto;
+    width: 90%;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    position: relative
 }
 
 .navbar-title {
-    font-size: 1.7rem;
+    font-size: 1.8rem;
     font-weight: 600;
-    color: #fff;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    color: transparent;
 }
 
 .navbar-center {
     display: flex;
-    gap: 25px;
+    gap: 1.5rem;
 }
 
 .nav-btn {
     background: transparent;
     border: none;
-    color: #e0e0e0;
-    font-weight: 500;
+    color: #f8fafc;
     font-size: 1rem;
     cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
     transition: all 0.3s ease;
 }
 

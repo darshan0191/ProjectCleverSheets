@@ -5,7 +5,7 @@ body {
     background: linear-gradient(135deg, #0f0f0f, #1a1a1a, #111827);
     color: #ffffffd9;
     height: 100vh;
-    overflow: hidden;
+    overflow-y: scroll;
     display: block;
 }
 
@@ -94,9 +94,7 @@ body {
 .dashboard-scroll {
     margin-top: 0;
     height: calc(100vh - 90px);
-    overflow-y: auto;
     padding: 2rem 4rem;
-    scrollbar-width: thin;
 }
 
 /* Header */
@@ -117,6 +115,7 @@ body {
     gap: 2rem;
     flex-wrap: wrap;
     justify-content: center;
+    padding-bottom: 10px;
 }
 
 .topics-section,

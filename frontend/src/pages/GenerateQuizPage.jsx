@@ -24,9 +24,8 @@ const GenerateQuizPage = () => {
     const [numQuestions, setNumQuestions] = useState(5);
     const [quizTime, setQuizTime] = useState(10);
     const [timeLeft, setTimeLeft] = useState(0);
-    const [navAttempts, setNavAttempts] = useState(0);
+    const [NavAttempts, setNavAttempts] = useState(0);
     const [tabSwitchCount, setTabSwitchCount] = useState(0);
-    const [showExitButton, setShowExitButton] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     const navigate = useNavigate();
@@ -205,10 +204,6 @@ const GenerateQuizPage = () => {
         }
     };
 
-    const exitFullscreen = () => {
-        if (document.fullscreenElement) document.exitFullscreen?.();
-        setIsFullscreen(false);
-    };
 
     const handleSafeNavigation = (path) => {
         if (quiz.length > 0 && !showResults) handleNavigationAttempt();

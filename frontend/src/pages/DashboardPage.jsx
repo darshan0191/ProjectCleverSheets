@@ -205,6 +205,7 @@ const DashboardPage = () => {
                         )}
                     </div>
 
+
                     <div className="stats-section glassy-card">
                         <div className="stat">
                             <h3>🧩 Total Quizzes Solved</h3>
