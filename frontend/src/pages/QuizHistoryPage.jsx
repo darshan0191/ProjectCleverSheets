@@ -95,7 +95,7 @@ const QuizHistoryPage = () => {
                 </div>
                 <div className="navbar-center">
                     <button className="nav-btn" onClick={() => navigate("/")}>Home</button>
-                    <button className="nav-btn" onClick={() => navigate("/generatequiz")}>Generate Quiz</button>
+                    <button className="nav-btn" onClick={() => navigate("/generate")}>Generate Quiz</button>
                     <button className="nav-btn" onClick={() => alert("Feedback coming soon 💬")}>Feedback</button>
                 </div>
                 <div className="navbar-right">
