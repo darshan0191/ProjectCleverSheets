@@ -1,0 +1,133 @@
+{
+    "subject": "Java",
+    "version": "1.0",
+    "topics": [
+        {
+            "id": "java_basics",
+            "name": "Basics",
+            "level": "beginner",
+            "subtopics": [
+                {
+                    "id": "syntax",
+                    "name": "Syntax",
+                    "keywords": [
+                        "class",
+                        "main",
+                        "semicolon"
+                    ],
+                    "learningGoals": [
+                        "Understand Java program structure"
+                    ]
+                },
+                {
+                    "id": "data_types",
+                    "name": "Data Types",
+                    "keywords": [
+                        "int",
+                        "float",
+                        "double",
+                        "boolean"
+                    ],
+                    "learningGoals": [
+                        "Use primitive data types correctly"
+                    ]
+                },
+                {
+                    "id": "loops",
+                    "name": "Loops",
+                    "keywords": [
+                        "for",
+                        "while",
+                        "do-while"
+                    ],
+                    "learningGoals": [
+                        "Implement iteration logic"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "java_oops",
+            "name": "OOP",
+            "level": "intermediate",
+            "subtopics": [
+                {
+                    "id": "inheritance",
+                    "name": "Inheritance",
+                    "keywords": [
+                        "extends",
+                        "super"
+                    ],
+                    "learningGoals": [
+                        "Reuse code"
+                    ]
+                },
+                {
+                    "id": "polymorphism",
+                    "name": "Polymorphism",
+                    "keywords": [
+                        "overriding",
+                        "dynamic binding"
+                    ],
+                    "learningGoals": [
+                        "Achieve runtime flexibility"
+                    ]
+                },
+                {
+                    "id": "abstraction",
+                    "name": "Abstraction",
+                    "keywords": [
+                        "abstract",
+                        "interface"
+                    ],
+                    "learningGoals": [
+                        "Design abstract systems"
+                    ]
+                },
+                {
+                    "id": "encapsulation",
+                    "name": "Encapsulation",
+                    "keywords": [
+                        "private",
+                        "getter",
+                        "setter"
+                    ],
+                    "learningGoals": [
+                        "Protect internal state"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "java_collections",
+            "name": "Collections",
+            "level": "advanced",
+            "subtopics": [
+                {
+                    "id": "list",
+                    "name": "List",
+                    "keywords": [
+                        "ArrayList",
+                        "LinkedList"
+                    ]
+                },
+                {
+                    "id": "set",
+                    "name": "Set",
+                    "keywords": [
+                        "HashSet",
+                        "TreeSet"
+                    ]
+                },
+                {
+                    "id": "map",
+                    "name": "Map",
+                    "keywords": [
+                        "HashMap",
+                        "TreeMap"
+                    ]
+                }
+            ]
+        }
+    ]
+}

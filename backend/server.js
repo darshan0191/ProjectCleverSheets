@@ -2,201 +2,161 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "20mb" }));
 
+/* ---------------- PATH SETUP ---------------- */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+/* ---------------- LOAD TAXONOMY SAFELY ---------------- */
+function loadTaxonomy(subject) {
+    const taxonomyPath = path.join(
+        __dirname,
+        "rag",
+        "taxonomy",
+        `${subject}.taxonomy.json`
+    );
+
+    if (!fs.existsSync(taxonomyPath)) {
+        throw new Error(`Taxonomy file not found: ${taxonomyPath}`);
+    }
+
+    return JSON.parse(fs.readFileSync(taxonomyPath, "utf-8"));
+}
+
+let javaTaxonomy;
+try {
+    javaTaxonomy = loadTaxonomy("java");
+    console.log("✅ Java taxonomy loaded");
+} catch (err) {
+    console.error("❌ Failed to load taxonomy:", err.message);
+}
+
+/* ---------------- GEMINI SETUP ---------------- */
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Helper: try to find and parse JSON array/object inside arbitrary text
+/* ---------------- HELPER: JSON extraction ---------------- */
 function extractJsonFromText(text) {
     if (!text || typeof text !== "string") return null;
 
-    const arrayStart = text.indexOf("[");
-    const arrayEnd = text.lastIndexOf("]");
-    if (arrayStart !== -1 && arrayEnd !== -1 && arrayEnd > arrayStart) {
-        const possible = text.slice(arrayStart, arrayEnd + 1);
-        try { return JSON.parse(possible); } catch (e) { }
-    }
-
-    const objStart = text.indexOf("{");
-    const objEnd = text.lastIndexOf("}");
-    if (objStart !== -1 && objEnd !== -1 && objEnd > objStart) {
-        const possibleObj = text.slice(objStart, objEnd + 1);
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+    if (start !== -1 && end !== -1 && end > start) {
         try {
-            const parsed = JSON.parse(possibleObj);
-            if (Array.isArray(parsed)) return parsed;
-            if (parsed.quiz && Array.isArray(parsed.quiz)) return parsed.quiz;
-            if (parsed.question && parsed.options) return [parsed];
-        } catch (e) { }
+            return JSON.parse(text.slice(start, end + 1));
+        } catch {
+            return null;
+        }
     }
-
     return null;
 }
 
-// Fallback parser: parse Q/A blocks into structured quiz
-function fallbackParseQuizFromText(raw) {
-    if (!raw || typeof raw !== "string") return null;
-    const text = raw.replace(/\r\n/g, "\n").replace(/\t/g, " ").trim();
-    const blocks = text.split(/\n(?=\s*\d+\.|\s*Q\d+[:.])/).map(b => b.trim()).filter(Boolean);
-    const quiz = [];
+/* ---------------- HEALTH CHECK ---------------- */
+app.get("/api/health", (req, res) => {
+    res.json({
+        status: "OK",
+        taxonomyLoaded: !!javaTaxonomy,
+    });
+});
 
-    for (const block of blocks) {
-        const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
-        if (lines.length === 0) continue;
-        let qLine = lines[0].replace(/^\s*(?:Q\s*\d+[:.]|\d+[).:]?)\s*/i, "").trim();
-
-        const options = [];
-        let correctAnswer = null;
-
-        for (let i = 1; i < lines.length; i++) {
-            const l = lines[i];
-            const optMatch = l.match(/^[A-D]\s*[)\.\-]\s*(.+)/i);
-            if (optMatch) { options.push(optMatch[1].trim()); continue; }
-            const optMatch2 = l.match(/^([A-D])\s*[:\-]?\s*(.+)/i);
-            if (optMatch2 && optMatch2[2]) { options.push(optMatch2[2].trim()); continue; }
-            const ansMatch = l.match(/(?:Answer|Correct)\s*[:\-]\s*([A-D]|[A-D]\)|[A-D]\.)\s*(.*)?/i);
-            if (ansMatch) {
-                const letter = ansMatch[1].replace(/\D/g, "").length ? null : ansMatch[1].trim().replace(/\)|\./g, "");
-                if (letter && /^[A-D]$/i.test(letter)) correctAnswer = letter.toUpperCase();
-                else if (ansMatch[2]) correctAnswer = ansMatch[2].trim();
-                continue;
-            }
-            if (options.length === 0) qLine += " " + l;
-        }
-
-        if (correctAnswer && /^[A-D]$/.test(correctAnswer) && options.length >= 1) {
-            const index = correctAnswer.charCodeAt(0) - 65;
-            if (options[index]) correctAnswer = options[index];
-        }
-
-        if (!correctAnswer) {
-            for (const optLine of lines.slice(1)) {
-                const idx = optLine.match(/^[A-D]\s*[)\.\-]\s*(.+?)(?:\s*\(correct\)|\s*\[correct\]|\s*\(right\))/i);
-                if (idx && idx[1]) { correctAnswer = idx[1].trim(); break; }
-            }
-        }
-
-        if (options.length < 2) {
-            const optTextMatch = block.match(/A[\)\.\-].*?B[\)\.\-].*?C[\)\.\-].*?D[\)\.\-].*/s);
-            if (optTextMatch) {
-                const parts = block.split(/(?=[A-D]\s*[)\.\-])/).map(p => p.trim()).filter(Boolean);
-                options.length = 0;
-                for (const p of parts) {
-                    const m = p.replace(/^[A-D]\s*[)\.\-]\s*/, "").trim();
-                    if (m) options.push(m);
-                }
-            }
-        }
-
-        if (!options || options.length === 0) continue;
-        if (!correctAnswer) correctAnswer = options[0];
-
-        quiz.push({ question: qLine, options, correctAnswer });
-    }
-
-    return quiz.length > 0 ? quiz : null;
-}
-
-// API endpoint
+/* ---------------- API: GENERATE QUIZ ---------------- */
 app.post("/api/generate-quiz", async (req, res) => {
     try {
         console.log("✅ /api/generate-quiz hit");
+
         const { notes, numQuestions } = req.body;
+        if (!notes || !notes.trim()) {
+            return res.status(400).json({ error: "No notes provided" });
+        }
 
-        if (!notes || !notes.trim()) return res.status(400).json({ error: "No notes provided" });
+        const questionsCount = Number(numQuestions) || 10;
 
-        const questionsCount = numQuestions && Number(numQuestions) > 0 ? Number(numQuestions) : 5;
+        /* Allowed topics from taxonomy */
+        const allowedTopics = Object.values(javaTaxonomy.topics).flat();
+        const validTopics = new Set(allowedTopics);
 
         const prompt = `
-You are an expert **exam paper setter** and **academic question designer**.  
-Your goal is to create questions that mirror how teachers frame exam questions — focusing on understanding, reasoning, and conceptual clarity.
+You are a university-level exam paper setter.
 
-### TASK:
-From the provided study notes, generate exactly **${questionsCount} multiple-choice questions (MCQs)** that:
-- Follow a **formal exam-style question pattern** (used in college/school exams).  
-- Are **concept-based**, not just memory-based.  
-- Include **one correct answer** and **three reasonable distractors**.
-- Maintain **clear and concise wording**, avoiding ambiguity.
-- Test understanding rather than recall whenever possible.
+TASK:
+Generate exactly ${questionsCount} MCQs from the given NOTES.
 
-### DIFFICULTY DISTRIBUTION:
-- 40% Easy (direct concept or definition-based)
-- 40% Medium (application or example-based)
-- 20% Hard (reasoning or inference-based)
+RULES:
+1. Each question MUST belong to exactly ONE topic from this list:
+${allowedTopics.join(", ")}
 
-### RESPONSE FORMAT:
-Return **only valid JSON**, no extra text or commentary.
+2. Add a "topic" field for every question.
+3. Each question must have exactly 4 options.
+4. Difficulty must match university exams.
+5. Return ONLY valid JSON (no explanation, no markdown).
+
+FORMAT:
 [
   {
-    "question": "Question text here",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correctAnswer": "Option B",
-    "difficulty": "Medium",
-    "type": "Conceptual / Application / Analytical"
-  },
-  ...
+    "question": "Question text",
+    "topic": "Inheritance",
+    "options": ["A", "B", "C", "D"],
+    "correctAnswer": "B"
+  }
 ]
 
-### REFERENCE NOTES:
+NOTES:
 ${notes}
 `;
 
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+        });
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-        console.log("🤖 sending prompt to model (length chars):", prompt.length);
         const result = await model.generateContent(prompt);
         const raw = await result.response.text();
-        console.log("🧾 raw model output preview (first 1000 chars):", raw.slice(0, 1000));
 
         let quiz = extractJsonFromText(raw);
-        if (!quiz) {
-            const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
-            if (fenced && fenced[1]) quiz = extractJsonFromText(fenced[1]);
-        }
-        if (!quiz) quiz = fallbackParseQuizFromText(raw);
 
         if (!Array.isArray(quiz) || quiz.length === 0) {
-            console.error("❌ Final quiz parsing failed. RAW:", raw.slice(0, 5000));
-            return res.status(500).json({ error: "Failed to parse quiz from model output.", raw: raw.slice(0, 5000) });
+            return res.status(500).json({
+                error: "Failed to parse quiz from model output",
+                raw,
+            });
         }
 
-        const sanitized = quiz.map((q, idx) => {
-            const question = (q.question || "").trim();
-            const options = Array.isArray(q.options) ? q.options.map(o => (o || "").trim()) : [];
-            let correctAnswer = q.correctAnswer ? (q.correctAnswer || "").trim() : null;
+        const sanitizedQuiz = quiz.map((q, idx) => {
+            let topic = q.topic?.trim();
+            if (!validTopics.has(topic)) topic = "Miscellaneous";
 
-            if (correctAnswer && /^[A-D]$/i.test(correctAnswer)) {
-                const index = correctAnswer.toUpperCase().charCodeAt(0) - 65;
-                if (options[index]) correctAnswer = options[index];
-            }
-
-            if (options.length < 4) {
-                const fallbackParts = options.length === 1 ? options[0].split(/\s*[\/;]\s*/) : [];
-                while (options.length < 4 && fallbackParts.length > options.length) {
-                    options.push(fallbackParts[options.length]?.trim());
-                }
-            }
+            const options = Array.isArray(q.options)
+                ? q.options.slice(0, 4).map(o => o.trim())
+                : ["Option A", "Option B", "Option C", "Option D"];
 
             return {
-                question: question || `Question ${idx + 1}`,
-                options: options.length ? options.slice(0, 4) : ["Option A", "Option B", "Option C", "Option D"],
-                correctAnswer: correctAnswer || (options[0] || "Option A"),
+                question: q.question?.trim() || `Question ${idx + 1}`,
+                topic,
+                options,
+                correctAnswer: options.includes(q.correctAnswer)
+                    ? q.correctAnswer
+                    : options[0],
             };
         });
 
-        console.log("✅ Parsed quiz items:", sanitized.length);
-        res.json({ quiz: sanitized });
+        console.log(`✅ Quiz generated: ${sanitizedQuiz.length} questions`);
+        res.json({ quiz: sanitizedQuiz });
     } catch (err) {
-        console.error("🔥 Error in /api/generate-quiz:", err);
-        res.status(500).json({ error: "Error generating or parsing quiz" });
+        console.error("🔥 Error generating quiz:", err);
+        res.status(500).json({ error: "Quiz generation failed" });
     }
 });
 
+/* ---------------- SERVER ---------------- */
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`🚀 CleverSheets backend running on http://localhost:${PORT}`);
+});

@@ -96,9 +96,9 @@ const HomePage = () => {
             {/* HERO SECTION */}
             <section className="hero-section">
                 <div className="hero-content glass">
-                    <h1 className="hero-title">Transform Your Notes into Smart Quizzes ✨</h1>
+                    <h1 className="hero-title">The platform that knows you best. ✨</h1>
                     <p className="hero-subtitle">
-                        CleverSheets helps you instantly generate engaging quizzes from your study notes.
+                        Designed for your unique way of doing things.
                     </p>
                     <button className="get-started-btn" onClick={() => navigate("/generate")}>
                         Get Started 🚀
@@ -111,16 +111,16 @@ const HomePage = () => {
                 <h2 className="section-title">Why Choose CleverSheets?</h2>
                 <div className="features-grid">
                     <div className="feature-card glass">
-                        <h3>🧠 AI Quiz Generation</h3>
-                        <p>Upload notes and get automatically generated quizzes instantly.</p>
+                        <h3>Optimized Learning Efficiency</h3>
+                        <p>targets your specific knowledge gaps so you can master topics faster without wasting time on what you already know.</p>
                     </div>
                     <div className="feature-card glass">
-                        <h3>📊 Track Your Progress</h3>
-                        <p>See how well you’re improving across topics with detailed stats.</p>
+                        <h3>Increased Student Engagement</h3>
+                        <p>adapts to your unique interests and learning style, making the content more relevant and motivating to complete.</p>
                     </div>
                     <div className="feature-card glass">
-                        <h3>🌐 Collaborative Learning</h3>
-                        <p>Share quizzes and challenge your friends for better engagement!</p>
+                        <h3>Stress Reduction and Confidence Building</h3>
+                        <p>It moves at your personal pace, providing the right support at the right time to reduce stress and build a sense of achievement.</p>
                     </div>
                 </div>
             </section>

@@ -7,7 +7,8 @@ import SignupPage from './pages/SignupPage';
 import GenerateQuizPage from './pages/GenerateQuizPage';
 import QuizHistoryPage from "./pages/QuizHistoryPage";
 import DashboardPage from "./pages/DashboardPage";
-
+import AssessmentPage from "./pages/AssessmentPage";
+import LearningPage from "./pages/LearningPage";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -19,6 +20,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/generate" element={<GenerateQuizPage />} />
         <Route path="/quiz-history" element={<QuizHistoryPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/assessment" element={<AssessmentPage />} />
+        <Route path="/learn" element={<LearningPage />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

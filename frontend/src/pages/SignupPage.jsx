@@ -32,7 +32,7 @@ function SignupPage() {
             await auth.currentUser.reload();
 
             // Redirect to home page
-            navigate("/");
+            navigate("/assessment");
         } catch (err) {
             setError(err.message);
         }

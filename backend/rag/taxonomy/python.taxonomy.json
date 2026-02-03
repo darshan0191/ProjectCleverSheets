@@ -1,0 +1,20 @@
+{
+    "subject": "Python",
+    "topics": [
+        {
+            "id": "python_basics",
+            "name": "Python Basics",
+            "subtopics": [
+                {
+                    "id": "loops",
+                    "name": "Loops",
+                    "keywords": [
+                        "for",
+                        "while",
+                        "range"
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,57 @@
+.learning-page {
+    min-height: 100vh;
+    padding: 40px;
+    background: linear-gradient(135deg, #0f0f0f, #111827);
+    color: #fff;
+}
+
+.topic-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.topic-tabs button {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: rgba(255,255,255,0.15);
+    color: white;
+}
+
+.topic-tabs .active {
+    background: #2563eb;
+}
+
+.topic-card, .quiz-card {
+    background: rgba(255,255,255,0.08);
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.question {
+    margin-bottom: 12px;
+}
+
+.option {
+    display: block;
+    margin-left: 10px;
+}
+
+.submit-btn {
+    margin-top: 12px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: none;
+    background: #22c55e;
+    color: black;
+    cursor: pointer;
+}
+
+.result {
+    margin-top: 12px;
+    font-weight: bold;
+    color: #4ade80;
+}
