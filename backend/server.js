@@ -6,12 +6,14 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import uploadKnowledge from "./routes/uploadKnowledge.js";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
+app.use("/api", uploadKnowledge);
 
 /* ---------------- PATH SETUP ---------------- */
 const __filename = fileURLToPath(import.meta.url);

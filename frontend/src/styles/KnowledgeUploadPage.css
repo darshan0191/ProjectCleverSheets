@@ -1,0 +1,58 @@
+.upload-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0f0f, #111827);
+    color: white;
+}
+
+.upload-container {
+    max-width: 700px;
+    margin: 60px auto;
+    text-align: center;
+}
+
+.upload-card {
+    margin-top: 30px;
+    padding: 40px;
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.upload-card input {
+    margin-bottom: 20px;
+    color: white;
+}
+
+.upload-btn {
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+    transform: translateY(-2px);
+}
+
+.progress-bar {
+    margin-top: 20px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #9333ea);
+    transition: width 0.4s ease;
+}
+
+.status-msg {
+    margin-top: 15px;
+}

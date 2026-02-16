@@ -19,7 +19,6 @@ const DashboardPage = () => {
     const [topPerformer, setTopPerformer] = useState(null);
     const [initialAssessment, setInitialAssessment] = useState(null);
 
-    // 🔥 Adaptive learning states
     const [recommendedContent, setRecommendedContent] = useState([]);
     const [weakTopics, setWeakTopics] = useState([]);
     const [strongTopics, setStrongTopics] = useState([]);
@@ -93,70 +92,11 @@ const DashboardPage = () => {
         }
     };
 
-    // ================= ADAPTIVE LEARNING =================
-    useEffect(() => {
-        if (quizHistory.length === 0) return;
-
-        const fetchAdaptiveLearning = async () => {
-            try {
-                setLoadingRecommendations(true);
-
-                const res = await fetch(
-                    "http://localhost:5000/api/adaptive-learning",
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            subject: "Java",
-                            quizHistory,
-                        }),
-                    }
-                );
-
-                const data = await res.json();
-
-                setWeakTopics(data.weakTopics || []);
-                setStrongTopics(data.strongTopics || []);
-                setRecommendedContent(data.recommendedContent || []);
-            } catch (err) {
-                console.error("Adaptive learning fetch failed:", err);
-            } finally {
-                setLoadingRecommendations(false);
-            }
-        };
-
-        fetchAdaptiveLearning();
-    }, [quizHistory]);
-
-    // ================= DERIVED DATA =================
-    const topics = [
-        ...new Set(
-            quizHistory.map(
-                (quiz) => quiz.quizTitle?.replace(".pdf", "") || "Untitled"
-            )
-        ),
-    ];
-
-    const filteredQuizzes = selectedTopic
-        ? quizHistory.filter(
-              (quiz) =>
-                  quiz.quizTitle?.replace(".pdf", "") === selectedTopic
-          )
-        : [];
-
-    const totalQuizzes = quizHistory.length;
-
-    const overallAccuracy =
-        totalQuizzes === 0
-            ? 0
-            : Math.round(
-                  quizHistory.reduce(
-                      (acc, quiz) =>
-                          acc +
-                          (quiz.correctAnswers / quiz.totalQuestions) * 100,
-                      0
-                  ) / totalQuizzes
-              );
+    // ================= NAVBAR HELPERS =================
+    const handleLogout = async () => {
+        await auth.signOut();
+        navigate("/");
+    };
 
     const getInitials = (user) => {
         const displayName = user?.displayName || user?.email || "";
@@ -167,26 +107,24 @@ const DashboardPage = () => {
             : names[0][0] + names[names.length - 1][0];
     };
 
-    const handleLogout = async () => {
-        await auth.signOut();
-        navigate("/");
-    };
-
     // ================= UI =================
     return (
         <div className="dashboard-page">
-            {/* NAVBAR */}
+
+            {/* 🔥 UPDATED NAVBAR */}
             <nav className="navbar glassy-nav">
                 <div className="navbar-left">
                     <h2 className="navbar-title">CleverSheets</h2>
                 </div>
 
                 <div className="navbar-center">
-                    <button className="nav-btn" onClick={() => navigate("/")}>
-                        Home
+                    <button
+                        className="nav-btn"
+                        onClick={() => navigate("/dashboard")}
+                    >
+                        Dashboard
                     </button>
 
-                    {/* ✅ NEW BUTTON */}
                     <button
                         className="nav-btn"
                         onClick={() => navigate("/learn")}
@@ -199,6 +137,14 @@ const DashboardPage = () => {
                         onClick={() => navigate("/quiz-history")}
                     >
                         Quiz History
+                    </button>
+
+                    {/* 🔥 NEW BUTTON */}
+                    <button
+                        className="nav-btn"
+                        onClick={() => navigate("/upload-knowledge")}
+                    >
+                        Upload Knowledge
                     </button>
                 </div>
 
@@ -230,17 +176,16 @@ const DashboardPage = () => {
                 </div>
             </nav>
 
-            {/* CONTENT */}
+            {/* ================= CONTENT ================= */}
+
             <div className="dashboard-scroll">
                 <div className="dashboard-header glassy-card">
                     <h2>📊 User Dashboard</h2>
                     <p>
-                        Track progress and get personalized learning
-                        recommendations
+                        Track progress and get personalized learning recommendations.
                     </p>
                 </div>
 
-                {/* INITIAL ASSESSMENT */}
                 {initialAssessment && (
                     <div className="glassy-card" style={{ marginBottom: "2rem" }}>
                         <h3>🧠 Initial Skill Assessment</h3>
@@ -252,107 +197,15 @@ const DashboardPage = () => {
                     </div>
                 )}
 
-                {/* 🎯 RECOMMENDATIONS */}
-                <div className="glassy-card" style={{ marginBottom: "2rem" }}>
-                    <h3>🎯 Personalized Learning Recommendations</h3>
-
-                    {loadingRecommendations && (
-                        <p style={{ color: "#9ca3af" }}>
-                            Analyzing your weak areas...
+                {topPerformer && (
+                    <div className="top-performer glassy-card">
+                        <h3>🏆 Top Performer</h3>
+                        <p>
+                            <strong>{topPerformer.name}</strong> —{" "}
+                            {topPerformer.totalQuizzes} quizzes
                         </p>
-                    )}
-
-                    {!loadingRecommendations &&
-                        recommendedContent.length === 0 && (
-                            <p style={{ color: "#9ca3af" }}>
-                                No recommendations yet.
-                            </p>
-                        )}
-
-                    {recommendedContent.map((item, i) => (
-                        <div
-                            key={i}
-                            style={{
-                                marginTop: "14px",
-                                padding: "14px",
-                                borderRadius: "12px",
-                                background:
-                                    "rgba(255,255,255,0.08)",
-                            }}
-                        >
-                            <h4>{item.topic}</h4>
-                            <p style={{ fontSize: "0.9rem" }}>
-                                {item.material.summary}
-                            </p>
-
-                            <button
-                                className="btn"
-                                onClick={() =>
-                                    navigate("/learn", {
-                                        state: {
-                                            topic: item.topic,
-                                            material: item.material,
-                                        },
-                                    })
-                                }
-                            >
-                                Start Learning →
-                            </button>
-                        </div>
-                    ))}
-                </div>
-
-                {/* STATS */}
-                <div className="dashboard-grid">
-                    <div className="topics-section glassy-card">
-                        <h3>📘 Topics</h3>
-                        <ul className="topics-list">
-                            {topics.map((topic, index) => (
-                                <li
-                                    key={index}
-                                    className={
-                                        selectedTopic === topic
-                                            ? "active-topic"
-                                            : ""
-                                    }
-                                    onClick={() =>
-                                        setSelectedTopic(topic)
-                                    }
-                                >
-                                    {topic}
-                                </li>
-                            ))}
-                        </ul>
                     </div>
-
-                    <div className="stats-section glassy-card">
-                        <div className="stat">
-                            <h3>Total Quizzes</h3>
-                            <p className="stat-value">{totalQuizzes}</p>
-                        </div>
-
-                        <div className="stat">
-                            <h3>Overall Accuracy</h3>
-                            <p className="stat-value">
-                                {overallAccuracy}%
-                            </p>
-                        </div>
-
-                        {selectedTopic && (
-                            <div className="topic-details">
-                                <h4>{selectedTopic} History</h4>
-                                <ul>
-                                    {filteredQuizzes.map((quiz, idx) => (
-                                        <li key={idx}>
-                                            {quiz.correctAnswers}/
-                                            {quiz.totalQuestions} correct
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

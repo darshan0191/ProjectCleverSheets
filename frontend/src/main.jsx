@@ -9,6 +9,7 @@ import QuizHistoryPage from "./pages/QuizHistoryPage";
 import DashboardPage from "./pages/DashboardPage";
 import AssessmentPage from "./pages/AssessmentPage";
 import LearningPage from "./pages/LearningPage";
+import KnowledgeBaseUploadPage from "./pages/KnowledgeBaseUploadPage";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/assessment" element={<AssessmentPage />} />
         <Route path="/learn" element={<LearningPage />} />
+        <Route path="/upload-knowledge" element={<KnowledgeBaseUploadPage />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

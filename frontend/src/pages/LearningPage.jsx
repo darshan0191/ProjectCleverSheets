@@ -5,9 +5,9 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/LearningMaterialPage.css";
 
-const QUIZ_SIZE = 2; // number of questions per attempt
+const QUIZ_SIZE = 2;
 
-// 🔀 Utility to shuffle array
+// 🔀 Shuffle Utility
 const shuffleArray = (array) => {
     return [...array].sort(() => Math.random() - 0.5);
 };
@@ -19,6 +19,9 @@ const LearningPage = () => {
     const recommendedTopic = state?.topic;
     const topics = Object.keys(learningMaterial);
 
+    const [user, setUser] = useState(null);
+    const [showProfile, setShowProfile] = useState(false);
+
     const [selectedTopic, setSelectedTopic] = useState(
         recommendedTopic || topics[0]
     );
@@ -29,7 +32,15 @@ const LearningPage = () => {
 
     const material = learningMaterial[selectedTopic];
 
-    // 🔥 Load NEW quiz on topic change OR retry
+    // 🔐 Auth Listener
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    // 🔥 Load new quiz when topic changes
     useEffect(() => {
         if (!material) return;
 
@@ -58,10 +69,9 @@ const LearningPage = () => {
         setScore(correct);
         setSubmitted(true);
 
-        const user = auth.currentUser;
         if (!user) return;
 
-        // 🔥 Update mastery (adaptive signal)
+        // 🔥 Update Mastery
         await setDoc(
             doc(db, "users", user.uid, "topicMastery", selectedTopic),
             {
@@ -85,10 +95,25 @@ const LearningPage = () => {
             0,
             QUIZ_SIZE
         );
+
         setCurrentQuiz(nextQuiz);
         setAnswers({});
         setSubmitted(false);
         setScore(0);
+    };
+
+    const handleLogout = async () => {
+        await auth.signOut();
+        navigate("/");
+    };
+
+    const getInitials = (user) => {
+        const displayName = user?.displayName || user?.email || "";
+        if (!displayName) return "";
+        const names = displayName.split(" ");
+        return names.length === 1
+            ? names[0][0]
+            : names[0][0] + names[names.length - 1][0];
     };
 
     if (!material) {
@@ -97,83 +122,141 @@ const LearningPage = () => {
 
     return (
         <div className="learning-page">
-            <h1>📘 Learning Material – Java</h1>
 
-            {/* TOPIC SELECTOR */}
-            <div className="topic-tabs">
-                {topics.map((topic) => (
+            {/* 🔥 NAVBAR */}
+            <nav className="navbar glassy-nav">
+                <div className="navbar-left">
+                    <h2 className="navbar-title">CleverSheets</h2>
+                </div>
+
+                <div className="navbar-center">
+                    <button className="nav-btn" onClick={() => navigate("/")}>
+                        Home
+                    </button>
+
                     <button
-                        key={topic}
-                        className={
-                            selectedTopic === topic ? "active" : ""
-                        }
-                        onClick={() => setSelectedTopic(topic)}
+                        className="nav-btn active-topic"
+                        onClick={() => navigate("/learn")}
                     >
-                        {topic}
+                        Learning Material
                     </button>
-                ))}
-            </div>
 
-            {/* EXPLANATION */}
-            <div className="topic-card">
-                <h2>{selectedTopic}</h2>
-                <p style={{ whiteSpace: "pre-line" }}>
-                    {material.explanation}
-                </p>
-            </div>
-
-            {/* QUIZ */}
-            <div className="quiz-card">
-                <h3>📝 Practice Quiz</h3>
-
-                {currentQuiz.map((q, i) => (
-                    <div key={i} className="question">
-                        <p>
-                            <strong>Q{i + 1}:</strong> {q.question}
-                        </p>
-
-                        {q.options.map((opt) => (
-                            <label key={opt} className="option">
-                                <input
-                                    type="radio"
-                                    name={`q-${i}`}
-                                    disabled={submitted}
-                                    onChange={() =>
-                                        handleOptionSelect(i, opt)
-                                    }
-                                />
-                                {opt}
-                            </label>
-                        ))}
-                    </div>
-                ))}
-
-                {!submitted ? (
-                    <button className="submit-btn" onClick={handleSubmitQuiz}>
-                        Submit Quiz
+                    <button
+                        className="nav-btn"
+                        onClick={() => navigate("/quiz-history")}
+                    >
+                        Quiz History
                     </button>
-                ) : (
-                    <div className="result">
-                        ✅ Score: {score} / {currentQuiz.length}
-                        <br />
+                </div>
 
-                        <button
-                            className="submit-btn"
-                            style={{ marginTop: "10px" }}
-                            onClick={handleNextAttempt}
-                        >
-                            Try Another Quiz 🔄
-                        </button>
+                <div className="navbar-right">
+                    {user && (
+                        <div className="profile-container">
+                            <div
+                                className="profile-icon"
+                                onClick={() =>
+                                    setShowProfile(!showProfile)
+                                }
+                            >
+                                {getInitials(user)}
+                            </div>
 
+                            {showProfile && (
+                                <div className="profile-dropdown glassy-card">
+                                    <p>{user.email}</p>
+                                    <button
+                                        className="btn logout-btn"
+                                        onClick={handleLogout}
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </nav>
+
+            {/* PAGE CONTENT */}
+            <div style={{ padding: "2rem", maxWidth: "900px", margin: "auto" }}>
+
+                {/* Topic Selector */}
+                <div className="topic-tabs">
+                    {topics.map((topic) => (
                         <button
-                            className="submit-btn"
-                            style={{ marginTop: "10px" }}
-                            onClick={() => navigate("/dashboard")}
+                            key={topic}
+                            className={
+                                selectedTopic === topic ? "active" : ""
+                            }
+                            onClick={() => setSelectedTopic(topic)}
                         >
-                            Back to Dashboard →
+                            {topic}
                         </button>
-                    </div>
-                )}
+                    ))}
+                </div>
+
+                {/* Explanation */}
+                <div className="topic-card">
+        <h2>{selectedTopic}</h2>
+        <p style={{ whiteSpace: "pre-line" }}>
+            {material.explanation}
+        </p>
+    </div>
+
+                {/* Quiz Section */}
+                <div className="quiz-card">
+                    <h3>📝 Practice Quiz</h3>
+
+                    {currentQuiz.map((q, i) => (
+                        <div key={i} className="question">
+                            <p>
+                                <strong>Q{i + 1}:</strong> {q.question}
+                            </p>
+
+                            {q.options.map((opt) => (
+                                <label key={opt} className="option">
+                                    <input
+                                        type="radio"
+                                        name={`q-${i}`}
+                                        disabled={submitted}
+                                        onChange={() =>
+                                            handleOptionSelect(i, opt)
+                                        }
+                                    />
+                                    {opt}
+                                </label>
+                            ))}
+                        </div>
+                    ))}
+
+                    {!submitted ? (
+                        <button className="submit-btn" onClick={handleSubmitQuiz}>
+                            Submit Quiz
+                        </button>
+                    ) : (
+                        <div className="result">
+                            ✅ Score: {score} / {currentQuiz.length}
+
+                            <br />
+
+                            <button
+                                className="submit-btn"
+                                style={{ marginTop: "10px" }}
+                                onClick={handleNextAttempt}
+                            >
+                                Try Another Quiz 🔄
+                            </button>
+
+                            <button
+                                className="submit-btn"
+                                style={{ marginTop: "10px" }}
+                                onClick={() => navigate("/dashboard")}
+                            >
+                                Back to Dashboard →
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
