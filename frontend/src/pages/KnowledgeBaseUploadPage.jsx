@@ -13,6 +13,9 @@ const KnowledgeBaseUploadPage = () => {
     const [message, setMessage] = useState("");
     const [progress, setProgress] = useState(0);
 
+    // 🔥 NEW STATE: structured knowledge
+    const [structuredData, setStructuredData] = useState({});
+
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((currentUser) => {
             setUser(currentUser);
@@ -21,43 +24,53 @@ const KnowledgeBaseUploadPage = () => {
     }, []);
 
     const handleUpload = async () => {
-    if (!file) {
-        setMessage("Please select a file first.");
-        return;
-    }
-
-    try {
-        setUploading(true);
-        setMessage("");
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await fetch(
-            "http://localhost:5000/api/upload-knowledge",
-            {
-                method: "POST",
-                body: formData,
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
+        if (!file) {
+            setMessage("Please select a file first.");
+            return;
         }
 
-        const data = await response.json();
+        try {
+            setUploading(true);
+            setMessage("");
+            setProgress(20);
 
-        setMessage("✅ " + data.message);
-        console.log("Extracted Preview:", data.preview);
+            const formData = new FormData();
+            formData.append("file", file);
 
-    } catch (err) {
-        console.error(err);
-        setMessage("❌ Upload failed. Check backend server.");
-    } finally {
-        setUploading(false);
-    }
-};
+            const response = await fetch(
+                "http://localhost:5000/api/upload-knowledge",
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
 
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            setProgress(60);
+            setMessage("✅ " + data.message);
+
+            // 🔥 Fetch structured knowledge after upload
+            const structuredRes = await fetch(
+                "http://localhost:5000/api/structured-knowledge"
+            );
+
+            const structuredJson = await structuredRes.json();
+
+            setStructuredData(structuredJson);
+            setProgress(100);
+
+        } catch (err) {
+            console.error(err);
+            setMessage("❌ Upload failed. Check backend server.");
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleLogout = async () => {
         await auth.signOut();
@@ -92,9 +105,7 @@ const KnowledgeBaseUploadPage = () => {
                     >
                         Dashboard
                     </button>
-                    <button
-                        className="nav-btn active-topic"
-                    >
+                    <button className="nav-btn active-topic">
                         Upload Knowledge
                     </button>
                 </div>
@@ -132,7 +143,7 @@ const KnowledgeBaseUploadPage = () => {
                 <h1>📂 Upload Knowledge Base</h1>
                 <p>
                     Upload textbook, PPT, or PDF.  
-                    The content will be used for adaptive RAG-based recommendations.
+                    The content will be structured into subtopics automatically.
                 </p>
 
                 <div className="upload-card">
@@ -147,7 +158,7 @@ const KnowledgeBaseUploadPage = () => {
                         onClick={handleUpload}
                         disabled={uploading}
                     >
-                        {uploading ? "Uploading..." : "Upload & Process"}
+                        {uploading ? "Processing..." : "Upload & Process"}
                     </button>
 
                     {progress > 0 && (
@@ -161,6 +172,30 @@ const KnowledgeBaseUploadPage = () => {
 
                     {message && <p className="status-msg">{message}</p>}
                 </div>
+
+                {/* 🔥 STRUCTURED SUBTOPICS DISPLAY */}
+                {Object.keys(structuredData).length > 0 && (
+                    <div className="structured-section">
+                        <h2>📚 Generated Subtopics</h2>
+
+                        {Object.keys(structuredData).map((topic, index) => (
+                            <div
+                                key={index}
+                                className="subtopic-card"
+                            >
+                                <h3>{topic}</h3>
+
+                                {structuredData[topic]
+                                    .slice(0, 2)
+                                    .map((content, i) => (
+                                        <p key={i}>
+                                            {content}
+                                        </p>
+                                    ))}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
